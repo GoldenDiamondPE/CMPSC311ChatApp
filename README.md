@@ -9,9 +9,4 @@ This is a program in C that uses a client, server, and display component to make
 
 
 ## Dispaly
-The display uses ncurses as a TUI (Terminal User Interface) to display the messages the user recieves from the server.
-  This can be installed with:
-  Ubuntu
-  _sudo apt install libncurses5-dev libncursesw5-dev_ 
-  Mac
-  _brew install ncurses_
+
