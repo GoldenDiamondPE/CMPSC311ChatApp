@@ -6,18 +6,57 @@
 # include <unistd.h>
 # include <netinet/in.h>
 #include <arpa/inet.h>
-
+# include <pthread.h>
+# include <string.h>
+#define _GNU_SOURCE  
 
 //At this time the server is only able to send messages
 
 #define MAX_CLIENTS 100 //defines the limit of clients
+
 int g_client_sockets[MAX_CLIENTS];
 int g_client_count = 0;
+
 
 void listOClients(const char *client){
 
 // client data would be stored in this list
 
+}
+
+//the void is the int? 
+
+static void * threadFunc(void *arg){
+    int client_socket = *((int *)arg);
+    free(arg); //frees space for pointer
+    char buffer[256];
+    printf("SERVER: Client connected on socket %d\n", client_socket);
+
+    while (1) {
+        ssize_t bytes_received = recv(client_socket, buffer, sizeof(buffer) - 1, 0);
+        
+            if (bytes_received == 0) {
+                printf("SERVER: Client on socket %d disconnected\n", client_socket);
+                break;
+            
+            }else if (bytes_received > 0){
+                buffer[bytes_received] = '\0'; //resets reponse 
+                printf("CLIENT[%d]: %s\n", client_socket, buffer);
+
+            }else if (bytes_received < 0){
+                 perror("SERVER: recv failed");
+                break;
+            }else{
+                /*
+                perror("recv failed");
+                break;
+                */
+               continue;
+            }
+    }
+
+    close(client_socket);
+    return NULL;
 }
 
 int main(){
@@ -40,7 +79,7 @@ int main(){
     int binds = bind(server_socket, (struct sockaddr*) &server_address, sizeof(server_address));
    
     if (binds< 0 ){
-        printf("SERVER: Bind failed");
+        perror("SERVER: Bind failed");
         return -1;
     } else {
         printf("SERVER: Bind successful\n");
@@ -58,7 +97,7 @@ int main(){
     };
     
 
-    //listens at this socket, any # besides 1 for small traffic levels, 
+    //listens at this socket, any # besides 1 for small traffic levels,
     int client_socket;
 
     //accept()
@@ -90,25 +129,36 @@ int main(){
     }
     
     */
-    client_socket = accept(server_socket, NULL,NULL);
-    //send the message
-    int numbFlag = 1;
-    char server_message[256]; // message
-    char finalM[268]; // numbFlag + message
-
-
     while(1){
-        scanf("%255s",server_message );//max char to be taken in
-        //snprintf(finalM, sizeof(finalM), "%d: %s", numbFlag, server_message);
+        client_socket = accept(server_socket, NULL, NULL);
+        if (client_socket < 0) { //checks to see if client connects
+            perror("SERVER: Accept failed");
+            continue;
+        }
 
-        send(client_socket, server_message, sizeof(server_message), 0);
-       
-       
+        int *client_arg = malloc(sizeof(int)); //allocates heap memory, meaning the seperate socket value copy for the new thread
+        if (client_arg == NULL) {
+            perror("SERVER: malloc failed");
+            close(client_socket);
+            continue;
+        }
+
+        *client_arg = client_socket;
+
+        pthread_t t;
+        if (pthread_create(&t, NULL, threadFunc, client_arg) != 0){ //checks to see if thread creation works
+                perror("pthread_create failed");
+                free(client_arg); //frees the space because creation failed
+                close(client_socket);
+                continue;
+        }
+
+        pthread_detach(t); // used for cleanup
+        g_client_count++;
     }
     
 
     close(server_socket);
-    close(client_socket);
     return 0;
 }
 //bulbasaur
