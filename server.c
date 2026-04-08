@@ -26,10 +26,11 @@ void listOClients(const char *client){
 
 //the void is the int? 
 
-static void * threadFunc(void *arg){
+static void * threadrec(void *arg){
     int client_socket = *((int *)arg);
     free(arg); //frees space for pointer
     char buffer[256];
+    char server_message[256] = "ButtCheek\n";
     printf("SERVER: Client connected on socket %d\n", client_socket);
 
     while (1) {
@@ -42,6 +43,7 @@ static void * threadFunc(void *arg){
             }else if (bytes_received > 0){
                 buffer[bytes_received] = '\0'; //resets reponse 
                 printf("CLIENT[%d]: %s\n", client_socket, buffer);
+                send(client_socket, server_message, strlen(server_message), 0);
 
             }else if (bytes_received < 0){
                  perror("SERVER: recv failed");
@@ -58,6 +60,11 @@ static void * threadFunc(void *arg){
     close(client_socket);
     return NULL;
 }
+
+
+
+
+
 
 int main(){
 
@@ -129,6 +136,8 @@ int main(){
     }
     
     */
+
+
     while(1){
         client_socket = accept(server_socket, NULL, NULL);
         if (client_socket < 0) { //checks to see if client connects
@@ -142,16 +151,20 @@ int main(){
             close(client_socket);
             continue;
         }
+       
 
         *client_arg = client_socket;
+        
 
         pthread_t t;
-        if (pthread_create(&t, NULL, threadFunc, client_arg) != 0){ //checks to see if thread creation works
+       
+        if (pthread_create(&t, NULL, threadrec, client_arg) != 0){ //checks to see if thread creation works
                 perror("pthread_create failed");
                 free(client_arg); //frees the space because creation failed
                 close(client_socket);
                 continue;
         }
+       
 
         pthread_detach(t); // used for cleanup
         g_client_count++;
