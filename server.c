@@ -17,6 +17,7 @@
 int g_client_sockets[MAX_CLIENTS];
 int g_client_count = 0;
 
+pthread_mutex_t client_mutex = PTHREAD_MUTEX_INITIALIZER; //Added by Matt
 
 void listOClients(const char *client){
 
@@ -30,7 +31,7 @@ static void * threadrec(void *arg){
     int client_socket = *((int *)arg);
     free(arg); //frees space for pointer
     char buffer[256];
-    char server_message[256] = "ButtCheek\n";
+   
     printf("SERVER: Client connected on socket %d\n", client_socket);
 
     while (1) {
@@ -43,7 +44,27 @@ static void * threadrec(void *arg){
             }else if (bytes_received > 0){
                 buffer[bytes_received] = '\0'; //resets reponse 
                 printf("CLIENT[%d]: %s\n", client_socket, buffer);
-                send(client_socket, server_message, strlen(server_message), 0);
+                /* OLD: sends message back only to same client
+				send(client_socket, server_message, strlen(server_message), 0);
+				*/
+
+				/* NEW: Broadcast message to all connected clients */
+
+				pthread_mutex_lock(&client_mutex);
+
+			for (int i = 0; i < g_client_count; i++) {
+
+    			int sock = g_client_sockets[i];
+
+    			/* Don't send message back to sender */
+    			if (sock != client_socket) {
+
+        		send(sock, buffer, strlen(buffer), 0);
+
+    			}
+			}
+
+pthread_mutex_unlock(&client_mutex);
 
             }else if (bytes_received < 0){
                  perror("SERVER: recv failed");
@@ -57,8 +78,29 @@ static void * threadrec(void *arg){
             }
     }
 
-    close(client_socket);
-    return NULL;
+    /*close(client_socket);
+    return NULL;*/
+    
+    //Matt: Remove disconnected client from list
+    pthread_mutex_lock(&client_mutex);
+
+	for (int i = 0; i < g_client_count; i++) {
+
+    	if (g_client_sockets[i] == client_socket) {
+
+        	for (int j = i; j < g_client_count - 1; j++) {
+
+            	g_client_sockets[j] = g_client_sockets[j + 1];
+
+        	}
+
+        	g_client_count--;
+        	break;
+    	}
+	}
+
+	pthread_mutex_unlock(&client_mutex);
+    //^^Matt^^
 }
 
 
@@ -154,7 +196,18 @@ int main(){
        
 
         *client_arg = client_socket;
+
         
+        //Matt: Adds client socket to global list
+        pthread_mutex_lock(&client_mutex);
+
+        if (g_client_count < MAX_CLIENTS) {
+            g_client_sockets[g_client_count] = client_socket;
+            g_client_count++;
+        }
+
+		pthread_mutex_unlock(&client_mutex);
+        //^^Added by Matt^^
 
         pthread_t t;
        

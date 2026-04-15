@@ -49,8 +49,11 @@ static void * threadFuncSend(void *arg){
     char client_message[256]; //client's message to send back
 
     while(1){
-        scanf("%255s",client_message);
-        send(server_socket, client_message, strlen(client_message), 0);
+        // OLD: breaks messages with spaces: scanf("%255s",client_message);
+		//New: allows spaces */
+		fgets(client_message, sizeof(client_message), stdin);
+
+		send(server_socket, client_message, strlen(client_message), 0);
        
     }
 }
@@ -142,4 +145,3 @@ int main(){
     
     return 0;
 }
-
