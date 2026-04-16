@@ -52,7 +52,13 @@ static void * threadFuncSend(void *arg){
         // OLD: breaks messages with spaces: scanf("%255s",client_message);
 		//New: allows spaces */
 		fgets(client_message, sizeof(client_message), stdin);
-
+		//strip out newline char
+		client_message[strcspn(client_message, "\n")] = '\0';
+		//close socket and quit if logoff message is received.
+		if (strcmp(client_message, "LOGOFF") == 0){
+			close(server_socket);
+			exit(0);
+		}
 		send(server_socket, client_message, strlen(client_message), 0);
        
     }
@@ -131,7 +137,7 @@ int main(){
                  free(server_arg2);
             }
 
-        
+        	printf("Type 'LOGOFF' at any time to exit.\n\n");
             s =  pthread_join(t1, &res);
             printf("\n%d\n",s);
 
