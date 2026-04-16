@@ -31,6 +31,7 @@ static void * threadrec(void *arg){
     int client_socket = *((int *)arg);
     free(arg); //frees space for pointer
     char buffer[256];
+	char whole_message[268];
    
     printf("SERVER: Client connected on socket %d\n", client_socket);
 
@@ -58,8 +59,8 @@ static void * threadrec(void *arg){
 
     			/* Don't send message back to sender */
     			if (sock != client_socket) {
-
-        		send(sock, buffer, strlen(buffer), 0);
+				snprintf(whole_message, 268, "CLIENT[%d]: %s", client_socket, buffer);
+        		send(sock, whole_message, strlen(whole_message), 0);
 
     			}
 			}
