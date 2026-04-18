@@ -28,9 +28,8 @@ static void * threadFuncRecv(void *arg){
 
             //n = bytes recieved
             if (n == 0){
-                printf("\nn == 0\n");
-                return (void *) " Server closed connection.\n ";
-                break;
+                printf("Server closed connection.\n";
+                _exit(1);
             }else if (n > 0){
                 buffer[n] = '\0'; //resets reponse 
                 printf("Server: %s\n",  buffer);
@@ -57,7 +56,7 @@ static void * threadFuncSend(void *arg){
 		//close socket and quit if logoff message is received.
 		if (strcmp(client_message, "LOGOFF") == 0){
 			close(server_socket);
-			exit(0);
+			_exit(0);
 		}
 		send(server_socket, client_message, strlen(client_message), 0);
        
@@ -139,7 +138,7 @@ int main(){
 
         	printf("Type 'LOGOFF' at any time to exit.\n\n");
             s =  pthread_join(t1, &res);
-            printf("\n%d\n",s);
+            //printf("\n%d\n",s);
 
 
     }else{
