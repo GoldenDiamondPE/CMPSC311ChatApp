@@ -32,7 +32,7 @@ static void * threadFuncRecv(void *arg){
                 _exit(1);
             }else if (n > 0){
                 buffer[n] = '\0'; //resets reponse 
-                printf("Server: %s\n",  buffer);
+                printf("%s\n",  buffer);
 
             }else{
                 perror("recv failed");
