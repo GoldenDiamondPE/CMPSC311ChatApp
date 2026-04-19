@@ -28,7 +28,7 @@ static void * threadFuncRecv(void *arg){
 
             //n = bytes recieved
             if (n == 0){
-                printf("Server closed connection.\n";
+                printf("Server closed connection.\n");
                 _exit(1);
             }else if (n > 0){
                 buffer[n] = '\0'; //resets reponse 
