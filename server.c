@@ -13,36 +13,36 @@
 //At this time the server is only able to send messages
 
 #define MAX_CLIENTS 100 //defines the limit of clients
+#define USER_NAME 32 //max length of username of 32
+
+char users[MAX_CLIENTS][USER_NAME]; //array to store usernames
 
 int g_client_sockets[MAX_CLIENTS];
 int g_client_count = 0;
 
 pthread_mutex_t client_mutex = PTHREAD_MUTEX_INITIALIZER; //Added by Matt
 
-void listOClients(const char *client){
-
-// client data would be stored in this list
-
-}
-
 //the void is the int? 
 
 static void * threadrec(void *arg){
     int client_socket = *((int *)arg);
     free(arg); //frees space for pointer
-    char buffer[256];
+    char buffer[234];
 	char whole_message[268];
    
     printf("SERVER: Client connected on socket %d\n", client_socket);
 
-    while (1) {
-        ssize_t bytes_received = recv(client_socket, buffer, sizeof(buffer) - 1, 0);
-        
-            if (bytes_received == 0) {
-                printf("SERVER: Client on socket %d disconnected\n", client_socket);
-                break;
-            
-            }else if (bytes_received > 0){
+    //while (1) {
+		//first message received from client is entry of user name
+        ssize_t bytes_received = recv(client_socket, users[client_socket], sizeof(users[client_socket]) - 1, 0);
+
+		users[client_socket][bytes_received]='\0';
+		//diagnostic printing of username and socket. Can be deleted before final version
+		printf("%s\n",users[client_socket]);
+		printf("%d\n",client_socket);
+		
+        if (bytes_received > 0){
+				/*buffer hasn't been touched yet. will reset at bottom of following 'while' loop
                 buffer[bytes_received] = '\0'; //resets reponse 
                 printf("CLIENT[%d]: %s\n", client_socket, buffer);
                 /* OLD: sends message back only to same client
@@ -50,34 +50,35 @@ static void * threadrec(void *arg){
 				*/
 
 				/* NEW: Broadcast message to all connected clients */
-
+			while((bytes_received = recv(client_socket, buffer, sizeof(buffer) - 1, 0))>0){
 				pthread_mutex_lock(&client_mutex);
 
 			for (int i = 0; i < g_client_count; i++) {
-
-    			int sock = g_client_sockets[i];
-
-    			/* Don't send message back to sender */
-    			if (sock != client_socket) {
-				snprintf(whole_message, 268, "CLIENT[%d]: %s", client_socket, buffer);
-        		send(sock, whole_message, strlen(whole_message), 0);
+    			/* Don't send message back to sender*/
+    			if (g_client_sockets[i] != client_socket) {
+				snprintf(whole_message, sizeof(whole_message), "%s: %s", users[client_socket], buffer);
+        		send(g_client_sockets[i], whole_message, strlen(whole_message), 0);
 
     			}
 			}
-
-pthread_mutex_unlock(&client_mutex);
-
-            }else if (bytes_received < 0){
+			//clear buffers
+			for(int i=0; i<sizeof(buffer); i++){
+				buffer[i] = '\0';
+			}
+			for(int i=0; i<sizeof(whole_message); i++){
+				whole_message[i] = '\0';
+			}
+			pthread_mutex_unlock(&client_mutex);
+		}
+		if (bytes_received == 0) {
+                printf("SERVER: Client on socket %d disconnected\n", client_socket);
+        }
+        else{ //if (bytes_received < 0){
                  perror("SERVER: recv failed");
-                break;
-            }else{
-                /*
-                perror("recv failed");
-                break;
-                */
-               continue;
-            }
-    }
+		}
+                //break;
+            //}
+    //}
 
     /*close(client_socket);
     return NULL;*/
