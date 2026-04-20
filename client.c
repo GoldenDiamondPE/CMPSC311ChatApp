@@ -129,7 +129,7 @@ int main(){
         }
 
         if (N == 1){
-			login()
+			login();
             *server_arg = serverFD;
             *server_arg2 = serverFD;
             pthread_t t1;
