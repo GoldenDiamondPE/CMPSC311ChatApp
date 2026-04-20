@@ -98,8 +98,7 @@ int main(){
         perror("connection was not successful\n");
         return(-1);
     }
-    char preNode[268] = "0_input";
-    int s; //pointer call
+    
     void *res;
 	int N = 1; //error check variable
 
@@ -129,7 +128,8 @@ int main(){
             perror("pthread_create failed");
             free(server_arg2);
         }
-        s =  pthread_join(t1, &res);
+        pthread_join(t1, &res);
+		pthread_join(t2, &res);
     }
 	//close the socket
     close(serverFD);
