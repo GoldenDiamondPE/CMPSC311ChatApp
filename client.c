@@ -9,6 +9,8 @@
 # include <string.h>
 # include <arpa/inet.h>
 
+int serverFD;
+
 /*
 At this time, the client is only able to recieve messages
 
@@ -63,10 +65,25 @@ static void * threadFuncSend(void *arg){
     }
 }
 
+//Log in or set user name
+void login(){
+	char username[32];
+	//get username from input
+	printf("\nEnter user name: ");
+	fgets(username, 32, stdin);
+	//strip newline character
+	username[strcspn(username, "\n")] = '\0';
+	
+	//send username to server
+	write(serverFD, username, sizeof(username));
+	printf("Logging in to server as %s.\n", username);
+	printf("Type 'LOGOFF' at any time to exit.\n\n");
+}
+
 
 int main(){
 
-    int serverFD  = socket(AF_INET, SOCK_STREAM, 0);
+    serverFD  = socket(AF_INET, SOCK_STREAM, 0);
     //server chooses (IPV4 addressing, TCP, default protocol(0))
     //bind() bind to port - specifies the address for the socket
 
@@ -112,6 +129,7 @@ int main(){
         }
 
         if (N == 1){
+			login()
             *server_arg = serverFD;
             *server_arg2 = serverFD;
             pthread_t t1;
