@@ -70,6 +70,7 @@ static void * threadrec(void *arg){
 			}
 			pthread_mutex_unlock(&client_mutex);
 		}
+		}
 		if (bytes_received == 0) {
                 printf("SERVER: Client on socket %d disconnected\n", client_socket);
         }
