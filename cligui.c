@@ -197,6 +197,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
 
     /* Connect the Send button */
     g_signal_connect(button, "clicked", G_CALLBACK(on_button_clicked), widgets);
+    g_signal_connect(widgets->entry, "activate", G_CALLBACK(on_button_clicked), widgets);
 
     /* Show the window */
     gtk_window_present(GTK_WINDOW(window));
