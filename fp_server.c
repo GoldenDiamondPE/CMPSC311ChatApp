@@ -42,7 +42,7 @@ static void * threadrec(void *arg){
 		printf("%d\n",client_socket);
 		
 		//Added by Matt - send join message to other clients
-		chat join_message[268];
+		char join_message[268];
 		
 		pthread_mutex_lock(&client_mutex);
 		
@@ -50,8 +50,9 @@ static void * threadrec(void *arg){
 		snprintf(join_message, sizeof(join_message), "*** %s has join the chat ***", users[client_socket]);
 		
 		/*Send to other clients*/
-		for(int = 0; i < g_client_count; i++){
+		for(int i = 0; i < g_client_count; i++){
 			if(g_client_sockets[i] != client_socket){
+                
 				send(g_client_sockets[i], join_message, strlen(join_message), 0);
 			}
 		}
