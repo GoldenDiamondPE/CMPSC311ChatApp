@@ -17,7 +17,7 @@ When 0 bytes are received from the client, disconnects the client from that sock
 
 
 ## Client/GUI
-Uses GTK library for GUI.
+Uses GTK library for GUI. GUI is further refined by HTML and CSS
 
 Standard connection methods and error checks for successful connection.
 
