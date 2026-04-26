@@ -57,10 +57,11 @@ static void * threadrec(void *arg){
 			}
 		}
 		
+        
 		pthread_mutex_unlock(&client_mutex);
 		//Added by Matt ^^^
 		
-        if (bytes_received > 0){
+        if (bytes_received > 0 ){
 				/*buffer hasn't been touched yet. will reset at bottom of following 'while' loop
                 buffer[bytes_received] = '\0'; //resets reponse 
                 printf("CLIENT[%d]: %s\n", client_socket, buffer);
@@ -69,26 +70,30 @@ static void * threadrec(void *arg){
 				*/
 
 				/* NEW: Broadcast message to all connected clients */
-			while((bytes_received = recv(client_socket, buffer, sizeof(buffer) - 1, 0))>0){
+			while((bytes_received = recv(client_socket, buffer, sizeof(buffer) - 1, 0)) > 0 ){
 				pthread_mutex_lock(&client_mutex);
 
-			for (int i = 0; i < g_client_count; i++) {
-    			/* Don't send message back to sender*/
-    			if (g_client_sockets[i] != client_socket) {
-				snprintf(whole_message, sizeof(whole_message), "%s: %s", users[client_socket], buffer);
-        		send(g_client_sockets[i], whole_message, strlen(whole_message), 0);
+                
+                for (int i = 0; i < g_client_count; i++) {
+                    /* Don't send message back to sender*/
+                    if (g_client_sockets[i] != client_socket) {
+                    snprintf(whole_message, sizeof(whole_message), "%s: %s", users[client_socket], buffer);
 
-    			}
-			}
-			//clear buffers
-			for(int i=0; i<sizeof(buffer); i++){
-				buffer[i] = '\0';
-			}
-			for(int i=0; i<sizeof(whole_message); i++){
-				whole_message[i] = '\0';
-			}
-			pthread_mutex_unlock(&client_mutex);
-		}
+                        if (buffer[0] != '\0'){
+                        send(g_client_sockets[i], whole_message, strlen(whole_message), 0);
+                    }
+                    }
+                }
+                //clear buffers
+                for(int i=0; i<sizeof(buffer); i++){
+                    buffer[i] = '\0';
+                }
+                for(int i=0; i<sizeof(whole_message); i++){
+                    whole_message[i] = '\0';
+                }
+                pthread_mutex_unlock(&client_mutex);
+            }
+          
 		}
 		if (bytes_received == 0) {
                 printf("SERVER: Client on socket %d disconnected\n", client_socket);

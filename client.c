@@ -10,7 +10,7 @@
 # include <arpa/inet.h>
 
 
-int serverFD;
+//int serverFD;
 
 
 static void * threadFuncRecv(void *arg){
@@ -62,7 +62,9 @@ static void * threadFuncSend(void *arg){
 
 
 //Log in and set user name
-void login(){
+void login(void *arg){
+    int server_socket = *((int *)arg);
+    free(arg); //frees space for pointer
 	char username[32];
 	//get username from input
 	printf("Enter user name: ");
@@ -71,7 +73,7 @@ void login(){
 	username[strcspn(username, "\n")] = '\0';
 	
 	//send username to server
-	write(serverFD, username, sizeof(username));
+	write(server_socket, username, sizeof(username));
 	printf("Logging in to server as %s.\n", username);
 	printf("Type 'LOGOFF' at any time to exit.\n\n");
 }
@@ -79,7 +81,7 @@ void login(){
 
 int main(){
 	//server chooses (IPV4 addressing, TCP, default protocol(0))
-    serverFD  = socket(AF_INET, SOCK_STREAM, 0);
+    int serverFD  = socket(AF_INET, SOCK_STREAM, 0);
 
     struct sockaddr_in server_address; // sockaddr_in is designed for IPv4
 
@@ -114,11 +116,19 @@ int main(){
         N = 0;
     }
 
+     int *server_arg3 = malloc(sizeof(int)); //allocates heap memory, meaning the seperate socket value copy for the new thread
+    if (server_arg3 == NULL) {
+        perror("Client: malloc failed");
+        N = 0;
+    }
+
 	//N=1 implies no errors during malloc
     if (N == 1){
-		login();
+		
         *server_arg = serverFD;
         *server_arg2 = serverFD;
+        *server_arg3 = serverFD;
+        login(server_arg3);
         pthread_t t1, t2;
         if (pthread_create(&t1, NULL, threadFuncRecv, server_arg) < 0){ //checks to see if thread creation works
             perror("pthread_create failed");
