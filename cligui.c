@@ -61,7 +61,7 @@ static void *threadFuncRecv(void *arg) {
             p->text_view = widgets->text_view;
             p->message = g_strdup("*** Server closed the connection. ***");
             g_idle_add(append_message_to_view, p);
-            return NULL;
+            _exit(0);
 
         } else if (n > 0) {
             buffer[n] = '\0';
@@ -102,7 +102,7 @@ static void on_button_clicked(GtkButton *btn, gpointer user_data) {
         // Get the application instance and shut it down
         GtkApplication *app = gtk_window_get_application(GTK_WINDOW(gtk_widget_get_root(widgets->entry)));
         g_application_quit(G_APPLICATION(app));
-        return;
+        _exit(0);
     }
 
     /* Transmit to server */
