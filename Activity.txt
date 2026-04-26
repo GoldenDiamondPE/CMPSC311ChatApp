@@ -1,0 +1,13 @@
+	Aaron:
+
+	Alex:
+ReadMe
+Username functionality in Client.
+Logoff functionality in Client.
+Fixed Client to allow multiple instances of program.
+Close client on logoff or server disconnect.
+Method to send Username plus Message.
+
+	Brandon:
+
+	Matt:
