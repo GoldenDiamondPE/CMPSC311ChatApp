@@ -1,0 +1,37 @@
+/* 1. Target the view and the drawing area */
+textview, 
+textview text {
+    background-color: #1e1e1e;
+    padding: 10px;
+    color: #ffffff; /* Base color */
+    font-size: 1.5rem;
+}
+
+
+/* 5. The Bottom Control Box (Container for Entry and Button) */
+box.horizontal { 
+    background-color: #434c5e; 
+    color: #ffffff;
+    padding: 10px;
+    font-size: 2rem;
+}
+
+/* 6. The Text Input Field */
+entry {
+    background-color: #ffffff;
+    color: #000000;
+    border-radius: 5px;
+}
+
+/* 7. The Send Button */
+#sendButton {
+    background-color: #5e81ac; 
+    color: white;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+#sendButton:hover {
+    background-color: #627a91;
+}
