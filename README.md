@@ -45,12 +45,12 @@ gcc server.c -lpthread -o server
 
 ### Client (cligui.c + chatapp.ui + style.css)
 DEPENDENCES
-  Ubuntu/Debian:
-    ```sudo apt install gcc pkg-config libgtk-4-dev```
-  Fedora/RHEL:
-    ```sudo dnf install gcc pkg-config gtk4-devel```
-  Arch:
-    ```sudo pacman -S gcc pkgconf gtk4```
+  Ubuntu/Debian:<br>
+    &emsp;&emsp;```sudo apt install gcc pkg-config libgtk-4-dev```<br>
+  Fedora/RHEL:<br>
+    &emsp;&emsp;```sudo dnf install gcc pkg-config gtk4-devel```<br>
+  Arch:<br>
+    &emsp;&emsp;```sudo pacman -S gcc pkgconf gtk4```<br>
 
-BUILD COMMAND 
-```gcc $(pkg-config --cflags gtk4) -o cligui cligui.c $(pkg-config --libs gtk4) -lpthread```
+BUILD COMMAND <br>
+&emsp;&emsp;```gcc $(pkg-config --cflags gtk4) -o cligui cligui.c $(pkg-config --libs gtk4) -lpthread```
