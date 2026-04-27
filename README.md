@@ -40,8 +40,8 @@ Subsequent strings will be sent to the server and echoed locally, concatenated w
 
 ## Build Commands
 
-### Server (server.c)
-gcc server.c -lpthread -o server
+### Server (fp_server.c)
+gcc fp_server.c -lpthread -o fp_server
 
 ### Client (cligui.c + chatapp.ui + style.css)
 DEPENDENCES
