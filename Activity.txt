@@ -1,4 +1,9 @@
 	Aaron:
+worked on the main structure of Server and Client.
+created handshake between server and client
+worked on how programs handle scheduling and how it avoids race conditions with threads
+fixed minor bugs
+
 
 	Alex:
 ReadMe
