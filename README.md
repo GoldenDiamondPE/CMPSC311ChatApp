@@ -52,5 +52,5 @@ DEPENDENCES
   Arch:<br>
     &emsp;&emsp;```sudo pacman -S gcc pkgconf gtk4```<br>
 
-BUILD COMMAND <br>
+BUILD COMMAND (Can be ran with this or using make)<br>
 &emsp;&emsp;```gcc $(pkg-config --cflags gtk4) -o cligui cligui.c $(pkg-config --libs gtk4) -lpthread```
