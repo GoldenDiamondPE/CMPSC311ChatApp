@@ -1,5 +1,4 @@
 # include <stdio.h>
-//# include "display.h"
 # include <stdlib.h>
 # include <sys/socket.h>
 # include <sys/types.h>
@@ -10,7 +9,7 @@
 # include <string.h>
 #define _GNU_SOURCE  
 
-//At this time the server is only able to send messages
+
 
 #define MAX_CLIENTS 100 //defines the limit of clients
 #define USER_NAME 32 //max length of username of 32
@@ -20,9 +19,8 @@ char users[MAX_CLIENTS][USER_NAME]; //array to store usernames
 int g_client_sockets[MAX_CLIENTS];
 int g_client_count = 0;
 
-pthread_mutex_t client_mutex = PTHREAD_MUTEX_INITIALIZER; //Added by Matt
+pthread_mutex_t client_mutex = PTHREAD_MUTEX_INITIALIZER; 
 
-//the void is the int? 
 
 static void * threadrec(void *arg){
     int client_socket = *((int *)arg);
@@ -55,7 +53,7 @@ static void * threadrec(void *arg){
 		}
 	}
 	pthread_mutex_unlock(&client_mutex);
-	//Added by Matt ^^^
+	
 		
     if (bytes_received > 0 ){
 		/* Broadcast message to all connected clients */
@@ -111,7 +109,7 @@ static void * threadrec(void *arg){
     	}
 	}
 	pthread_mutex_unlock(&client_mutex);
-    //^^Matt^^
+   
 }
 
 
@@ -177,7 +175,6 @@ int main(){
         }
 
 		pthread_mutex_unlock(&client_mutex);
-        //^^Added by Matt^^
 
         pthread_t t;
        
