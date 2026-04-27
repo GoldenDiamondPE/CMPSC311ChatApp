@@ -12,14 +12,18 @@
 
 
 static int serverFD = -1;
-static char g_client_label[64] = "me";
+// Display Name
+static char g_client_label[64] = "me"; 
+// Check for user name being sent
 bool firstMessage = true;
 
+// For GTK Text Entry and Chat History
 typedef struct {
     GtkWidget *entry;
     GtkWidget *text_view;
 } ChatWidgets;
 
+// Needed as GTK is single threaded
 typedef struct { // Deliver message to GTK main thread
     GtkWidget *text_view;
     char *message;
@@ -27,6 +31,7 @@ typedef struct { // Deliver message to GTK main thread
 
 
 static gboolean append_message_to_view(gpointer data) {
+    // Unpacks data
     RecvPayload *p = (RecvPayload *)data;
 
     // Append Message
@@ -36,13 +41,14 @@ static gboolean append_message_to_view(gpointer data) {
     gtk_text_buffer_insert(buf, &end, p->message, -1);
     gtk_text_buffer_insert(buf, &end, "\n", -1);
 
-    /* Auto-scroll: push the vertical adjustment to its maximum value */
+    // Auto-scroll: push the vertical adjustment to its maximum value
     GtkWidget *parent = gtk_widget_get_parent(p->text_view);
     if (GTK_IS_SCROLLED_WINDOW(parent)) {
         GtkAdjustment *adj = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(parent));
         gtk_adjustment_set_value(adj, gtk_adjustment_get_upper(adj) - gtk_adjustment_get_page_size(adj));
     }
 
+    // Free memory
     g_free(p->message);
     g_free(p);
     return G_SOURCE_REMOVE;
@@ -56,7 +62,7 @@ static void *threadFuncRecv(void *arg) {
         ssize_t n = recv(serverFD, buffer, sizeof(buffer) - 1, 0);
 
         if (n == 0) {
-            /* Server closed the connection */
+            // Server closed the connection
             RecvPayload *p = g_new0(RecvPayload, 1);
             p->text_view = widgets->text_view;
             p->message = g_strdup("*** Server closed the connection. ***");
@@ -64,6 +70,7 @@ static void *threadFuncRecv(void *arg) {
             _exit(0);
 
         } else if (n > 0) {
+            // Data arrived
             buffer[n] = '\0';
             RecvPayload *p = g_new0(RecvPayload, 1);
             p->text_view = widgets->text_view;
@@ -71,7 +78,7 @@ static void *threadFuncRecv(void *arg) {
             g_idle_add(append_message_to_view, p);
 
         } else {
-            /* recv() returned -1 — real error */
+            // recv() returned -1, Error
             perror("recv failed");
             break;
         }
@@ -105,18 +112,21 @@ static void on_button_clicked(GtkButton *btn, gpointer user_data) {
         _exit(0);
     }
 
-    /* Transmit to server */
+    // Transmit to server
     if (serverFD >= 0) {
         send(serverFD, text, strlen(text), 0);
     }
 
-    /* Local echo */
+    // Checks to see if first message has been sent, to establish username
+    // Local echo
     char *line = NULL;
     if(firstMessage==true){
+        // Creates username
         g_strlcpy(g_client_label, text, sizeof(g_client_label));
-        line = g_strdup_printf("USERNAME: %s", text);
+        line = g_strdup_printf("Username: %s", text);
         firstMessage = false;
     }else{
+        // Prints messages
         line = g_strdup_printf("You (%s): %s", g_client_label, text);
     }
     
@@ -143,6 +153,7 @@ static void on_button_clicked(GtkButton *btn, gpointer user_data) {
 static void activate(GtkApplication *app, gpointer user_data) {
     (void)user_data;
 
+    // Socket creation failed
     serverFD = socket(AF_INET, SOCK_STREAM, 0);
     if (serverFD < 0) {
         perror("CLIENT: socket() failed");
@@ -151,8 +162,8 @@ static void activate(GtkApplication *app, gpointer user_data) {
 
     struct sockaddr_in server_address;
     memset(&server_address, 0, sizeof(server_address));
-    server_address.sin_family = AF_INET;
-    server_address.sin_port = htons(8080);
+    server_address.sin_family = AF_INET; //IPV4
+    server_address.sin_port = htons(8080); // Port
 
     if (inet_pton(AF_INET, "127.0.0.1", &server_address.sin_addr) <= 0) {
         perror("CLIENT: Invalid address");
@@ -161,6 +172,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
         return;
     }
 
+    // Connect failed
     if (connect(serverFD, (struct sockaddr *)&server_address, sizeof(server_address)) < 0) {
         perror("CLIENT: connect() failed");
         close(serverFD);
@@ -178,6 +190,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
 
     printf("CLIENT: Connected as %s\n", g_client_label);
 
+    // Loads in UI file
     GtkBuilder *builder = gtk_builder_new_from_file("chatapp.ui");
     if (builder == NULL) {
         g_error("CLIENT: Could not load chatapp.ui — check the filename.");
@@ -191,6 +204,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
     widgets->entry = GTK_WIDGET(gtk_builder_get_object(builder, "textEntry"));
     widgets->text_view = GTK_WIDGET(gtk_builder_get_object(builder, "textView"));
 
+    // Checks to see if UI components are all there
     if (!window || !button || !widgets->entry || !widgets->text_view) {
         if (!window) fprintf(stderr, "CLIENT: 'appWindow' ID not found in UI file\n");
         if (!button) fprintf(stderr, "CLIENT: 'sendButton' ID not found in UI file\n");
@@ -202,6 +216,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
         return;
     }
 
+    // Connects CSS file
     GtkCssProvider *provider = gtk_css_provider_new();
     gtk_css_provider_load_from_path(provider, "style.css");
     gtk_style_context_add_provider_for_display(
@@ -210,15 +225,15 @@ static void activate(GtkApplication *app, gpointer user_data) {
         GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
     );
 
-    /* Chat history area is read-only — the user types in the entry only */
+    // Chat history area is read-only — the user types in the entry only
     gtk_text_view_set_editable(GTK_TEXT_VIEW(widgets->text_view), FALSE);
     gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(widgets->text_view), FALSE);
 
-    /* Window setup */
+    // Window setup 
     gtk_window_set_application(GTK_WINDOW(window), app);
     gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
 
-    /* Connect the Send button */
+    // Connect the Send button
     g_signal_connect(button, "clicked", G_CALLBACK(on_button_clicked), widgets);
     g_signal_connect(widgets->entry, "activate", G_CALLBACK(on_button_clicked), widgets);
 
@@ -242,6 +257,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_text_buffer_insert(initial_buf, &initial_iter, "ENTER YOUR USERNAME IN TEXT BOX BELOW\n", -1);
 }
 
+// Creates GTK app and connects active
 int main(int argc, char **argv) {
     GtkApplication *app = gtk_application_new(NULL, G_APPLICATION_DEFAULT_FLAGS);
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
