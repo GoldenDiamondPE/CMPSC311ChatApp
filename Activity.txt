@@ -9,6 +9,10 @@ Close client on logoff or server disconnect.
 Method to send Username plus Message.
 
 	Brandon:
+Worked on Client and GUI integration
+Set up proper commands so user will be prompted to create a username and how to exit the client
+Used GTK to help develup the client, which is renered through the UI and CSS file
+Prototyped a Appimage and Flatpak build but was unseccesful.
 
 	Matt:
 Client-server communication functionality
