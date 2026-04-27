@@ -11,3 +11,7 @@ Method to send Username plus Message.
 	Brandon:
 
 	Matt:
+Client-server communication functionality
+Fixed so the program could run with several clients active at the same time
+Wrote code to print a message whenever a new user joins the chat room
+Wrote code to print a message whenever a user leaves the chat room
